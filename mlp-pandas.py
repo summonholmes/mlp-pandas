@@ -6,7 +6,7 @@ from pandas import DataFrame
 """
 Use any dataset with a target
 """
-test_scores = DataFrame({
+films = DataFrame({
     "Liberalness": [3, 5, 7, 10, 10],
     "Duration": [3, 1, 1.5, 2, 2.5],
     "Amount of Races": [1, 3, 2, 5, 7],
@@ -15,7 +15,7 @@ test_scores = DataFrame({
     "Is Superhero Film": [0, 0, 0, 1, 1],
     "Film Review Score": [0, 0.65, 0.72, 0.93, 1]
 })
-X = test_scores.copy()  # Tensor
+X = films.copy()  # Tensor
 y = X.pop("Film Review Score")  # Target
 
 # Define Hypers
