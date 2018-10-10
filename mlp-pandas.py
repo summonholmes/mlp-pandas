@@ -61,9 +61,9 @@ predicted_output = sigmoid_activation(activity_2_dot_weights_2)  # yHat
 # Backward Propagation - Gradient Descent - Cost Function Prime
 """
 1. How wrong are the predictions?
-2. Define a cost_fxn - Pretty much everything above
-    - cost_fxn = sum(0.5 * (y -
-        predicted_output)**2)
+2. Define a cost_fxn to obtain error - Pretty much everything above
+    - Sum of squares error (SSE) is used
+    - SSE = sum(0.5 * (y - predicted_output)**2)
 2. Calculate the derivative of the sigmoid function
 3. Use the chain rule to solve for d_SSE_d_W
 4. Adjust the weights via Gradient Descent
@@ -71,6 +71,7 @@ predicted_output = sigmoid_activation(activity_2_dot_weights_2)  # yHat
 
 
 # Derivative of the sigmoid function above - Power rule
+# Essentially e^-x/(1+e^-x)^2
 def sigmoid_activation_prime(dot_result):
     return exp(-dot_result) / (1 + exp(-dot_result))**2
 
