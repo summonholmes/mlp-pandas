@@ -45,7 +45,6 @@ class MLP:
         """
         1. Matrix multiply dimensional inputs for samples and weights 1
         2. Apply the sigmoid activation to (1.)
-            - 1 / ln (input_dot_weights_1)
         3. Matrix multiply (2.) by weights 2
         4. Apply the sigmoid activation to (3.)
         """
