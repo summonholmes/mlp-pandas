@@ -49,7 +49,7 @@ weights_2 = random.randn(hidden_nodes, output_nodes)  # W2
 """
 
 
-# Activation for the input, basically 1/e^x
+# Activation for the input, basically 1/(1 + e^-x)
 def sigmoid_activation(dot_result):
     return 1 / (1 + exp(-dot_result))
 
@@ -71,9 +71,9 @@ predicted_output = sigmoid_activation(activity_2_dot_weights_2)  # yHat
 """
 
 
-# Derivative of the sigmoid function above
+# Derivative of the sigmoid function above - Power rule
 def sigmoid_activation_prime(dot_result):
-    return exp(-dot_result) / ((1 + exp(-dot_result))**2)
+    return exp(-dot_result) / (1 + exp(-dot_result))**2
 
 
 miss_amount = -(y - predicted_output)

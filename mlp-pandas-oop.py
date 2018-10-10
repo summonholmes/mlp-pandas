@@ -11,7 +11,7 @@ is that abstraction increases debugging difficulty.
 
 
 class MLP:
-    # random.seed(0)
+    random.seed(0)
 
     def __init__(self, dataset):
         # Set Hypers & Initialize weights
@@ -43,7 +43,7 @@ class MLP:
     def forward_prop(self):
         # Forward Propagation
         """
-        1. Matrix multiply dimensional inputs for sample 1 and weights 1
+        1. Matrix multiply dimensional inputs for samples and weights 1
         2. Apply the sigmoid activation to (1.)
             - 1 / ln (input_dot_weights_1)
         3. Matrix multiply (2.) by weights 2
@@ -57,7 +57,7 @@ class MLP:
 
     def sigmoid_activation_prime(self, dot_result):
         # Derivative of the sigmoid function above (Power rule).
-        return exp(-dot_result) / ((1 + exp(-dot_result))**2)
+        return exp(-dot_result) / (1 + exp(-dot_result))**2
 
     def backward_prop(self):
         # Backward Propagation - Gradient Descent - Cost Function Prime
