@@ -9,29 +9,29 @@ as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2
 
 ## Overview
 The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with a single hidden layer.  
-This will be referred as the model throughout this readme.
+This will be referred to as 'the model' throughout this README.
 
 #### Data Source
-A hypothetical data source providing data for film reviews is provided.  This can be any
-n-dimensional numerical data.  If the data is categorial, it requires conversion
-to boolean or one-hot encoding.
+A hypothetical dataset for film reviews is provided.  This dataset may be replaced with any
+n-dimensional numerical dataset.  If any data is categorial, it must be converted
+to boolean, or one-hot encoding must be performed.
 
 #### Hyperparameters
-The hyperparameters will scale according to the dimensionality of the data provided.
-This initializes the architecture of the model.
+The hyperparameters will scale according to the dimensionality of the dataset.
+The hyperparameters initialize the architecture of the model.
 
 #### Weights/Synapses
-These are initialized randomly using ranged standard normal distributions.
+These are initialized randomly using the standard normal distribution.
 
 #### Forward Propagation
 Consisting of only linear algebra, this process simply takes the input and allows the model to ouput a result.
 
 #### Backward Propagation
-In addition to linear algebra, the optimization method Stochastic Gradient Descent (SGD) is applied
-to indicate the changes needed for the weights/synapses.
+In addition to linear algebra, the optimization method Stochastic Gradient Descent (SGD) is applied in
+batch-style to indicate the changes needed for the weights/synapses.
 
 #### Training
-The process will iterate for a given amount of time so the model can learn.
+The Forward Propagation and Backward Propagation will iterate so the model can learn.
 
 #### Results
-The final results are added back to the original dataframe as the "Predicted Score".
+The predicted results are added back to the original dataframe as the "Predicted Score".
