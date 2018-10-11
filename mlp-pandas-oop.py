@@ -50,7 +50,7 @@ class MLP:
             self.activity_2_dot_weights_2)
 
     def sigmoid_activation_prime(self, dot_result):
-        # Derivative of the sigmoid function above (Power rule).
+        # Derivative of the sigmoid function above - Power rule & Chain rule
         # Essentially e^-x/(1+e^-x)^2
         return exp(-dot_result) / (1 + exp(-dot_result))**2
 

@@ -1,6 +1,6 @@
 from numpy import dot, exp, newaxis, random
 from pandas import DataFrame
-# random.seed(0)
+random.seed(0)
 """MLP Pandas"""
 
 # Create Dataset
@@ -75,7 +75,7 @@ predicted_output = sigmoid_activation(activity_2_dot_weights_2)  # yHat
 """
 
 
-# Derivative of the sigmoid function above - Power rule
+# Derivative of the sigmoid function above - Power rule & Chain rule
 # Essentially e^-x/(1+e^-x)^2
 def sigmoid_activation_prime(dot_result):
     return exp(-dot_result) / (1 + exp(-dot_result))**2
