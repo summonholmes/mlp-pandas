@@ -1,5 +1,6 @@
 from numpy import dot, exp, newaxis, random
 from pandas import DataFrame
+# random.seed(0)
 """
 MLP Pandas
 
@@ -11,17 +12,13 @@ is that abstraction increases debugging difficulty.
 
 
 class MLP:
-    random.seed(0)
-
-    def __init__(self, dataset):
+    def __init__(self, X, y):
         # Set Hypers & Initialize weights
         """
         These dictate the structure of the ANN
         """
-        self.X = dataset.copy()
-        self.y = self.X.pop("Film Review Score")
-        self.y = self.y.values[..., newaxis]
-        self.X = self.X.values
+        self.X = X.values
+        self.y = y.values[..., newaxis]
         self.input_nodes = self.X.shape[1]
         self.hidden_nodes = self.X.shape[1] + 1
         self.output_nodes = 1
@@ -31,10 +28,8 @@ class MLP:
         Take random samples from the standard normal
         distribution
         """
-        self.weights_1 = random.randn(self.input_nodes,
-                                      self.hidden_nodes)  # W1
-        self.weights_2 = random.randn(self.hidden_nodes,
-                                      self.output_nodes)  # W2
+        self.weights_1 = random.randn(self.input_nodes, self.hidden_nodes)
+        self.weights_2 = random.randn(self.hidden_nodes, self.output_nodes)
 
     def sigmoid_activation(self, dot_result):
         # Activation for the input, basically 1/(1 + e^-x)
@@ -62,12 +57,14 @@ class MLP:
     def backward_prop(self):
         # Backward Propagation - Gradient Descent - Cost Function Prime
         """
-        1. How wrong are the predictions?
+        1. How wrong are the predictions?  Work backwards.
         2. Define a cost_fxn to obtain error - Pretty much everything above
-            - Sum of squares error (SSE) is used
-            - SSE = sum(0.5 * (y - predicted_output)**2)
+            - Sum of squares error (SSE) is used and multiplied by 0.5
+            - SSE = sum(0.5 * (y - predicted_output)^2)
+            - Expanding the SSE equation yields:
+
         2. Calculate the derivative of the sigmoid function
-        3. Use the chain rule to solve for d_SSE_d_W
+        3. Use the chain rule to solve for the d_SSE_d_weights
         4. Adjust the weights via Gradient Descent
         """
         self.miss_amount = -(self.y - self.predicted_output)
@@ -80,6 +77,8 @@ class MLP:
         self.delta_2 = dot(self.delta_3,
                            self.weights_2.T) * self.sigmoid_prime_2
         self.d_SSE_d_weights_1 = dot(self.X.T, self.delta_2)
+
+        # Minimize error by updating weights
         self.weights_2 -= self.d_SSE_d_weights_2 * self.learning_rate
         self.weights_1 -= self.d_SSE_d_weights_1 * self.learning_rate
 
@@ -87,7 +86,7 @@ class MLP:
         # Training the model
         """
         1. Take everything learned from above and simply iterate
-        1. By adjusting the weights with -=, cost is minimized
+        1. By adjusting the weights with -=, error is minimized
         for every iteration
         2. Optionally, a stop condition may be added but this model
         will run for the amount of iterations provided
@@ -99,7 +98,8 @@ class MLP:
 
 # Create Dataset
 """
-Use any dataset with a target
+Use any numerical dataset with a target,
+or process categorical data first
 """
 films = DataFrame({
     "Liberalness": [3, 5, 7, 10, 10],
@@ -112,7 +112,12 @@ films = DataFrame({
 })
 
 # Test the object
-mlp = MLP(films)
+X = films
+y = X.pop("Film Review Score")
+mlp = MLP(X, y)
 mlp.mlp_train()
-mlp.predicted_output
-mlp.y
+
+# Assign the results back to the original Pandas dataframe
+films["Film Review Score"] = mlp.y
+films["Predicted Score"] = mlp.predicted_output
+films

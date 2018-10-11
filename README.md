@@ -7,6 +7,13 @@ This project was inspired by
 [Neural Networks Demystified](https://www.youtube.com/watch?v=bxe2T-V8XRs&list=PLiaHhY2iBX9hdHaRr6b7XevZtgZRa1PoU&index=1)
 as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2015/07/12/basic-python-network/).
 
+## Dependencies
+* python3-numpy
+* python3-pandas
+
+## Instructions
+Use these scripts interactively in an IPython environment.
+
 ## Overview
 The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with a single hidden layer.  
 This will be referred to as 'the model' throughout this README.
