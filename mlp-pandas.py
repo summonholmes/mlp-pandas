@@ -65,9 +65,13 @@ predicted_output = sigmoid_activation(activity_2_dot_weights_2)  # yHat
 2. Define a cost_fxn to obtain error - Pretty much everything above
     - Sum of squares error (SSE) is used and multiplied by 0.5
     - SSE = sum(0.5 * (y - predicted_output)**2)
+    - Expanding the SSE equation yields:
+        SSE = sum(0.5 * (y - sigmoid_activation(
+            dot(sigmoid_activation(dot(X, weights_1)),
+            weights_2)))^2)
 2. Calculate the derivative of the sigmoid function
-3. Use the chain rule to solve for the d_SSE_d_weights
-4. Adjust the weights via Gradient Descent
+3. Use the chain rule to solve for the d_SSE_d_weights 1 & 2
+4. Adjust the weights
 """
 
 
