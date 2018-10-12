@@ -1,4 +1,4 @@
-from numpy import exp
+from numpy import dot, exp, newaxis
 from numpy.random import randn
 from pandas import DataFrame
 # seed(0)
@@ -18,9 +18,10 @@ films = DataFrame({
     "Is Superhero Film": [0, 0, 0, 1, 1],
     "Film Review Score": [0, 0.65, 0.72, 0.93, 1]
 })
-films.index = ("Sample " + str(i + 1) for i in range(films.shape[0]))
 X = films  # Tensor
-y = DataFrame(X.pop("Film Review Score"))  # Target
+y = X.pop("Film Review Score")  # Target
+y = y.values[..., newaxis]
+X = X.values
 
 # Define Hypers
 """
@@ -31,21 +32,14 @@ hidden_nodes = X.shape[1] + 1
 output_nodes = 1
 learning_rate = 1  # Dictates weight adjustment
 iterations = 500
-output_neuron = ["Output Neuron"]  # Just a final column label
 
 # Generate weights
 """
 Take random samples from the standard normal
 distribution
 """
-weights_1 = DataFrame(
-    randn(input_nodes, hidden_nodes),
-    index=X.columns,
-    columns=("Input Synapses " + str(i + 1) for i in range(X.shape[1] + 1)))
-weights_2 = DataFrame(
-    randn(hidden_nodes, output_nodes),
-    index=("HL1-Neuron " + str(i + 1) for i in range(weights_1.shape[1])),
-    columns=["Output Synapses"])
+weights_1 = randn(input_nodes, hidden_nodes)  # W1
+weights_2 = randn(hidden_nodes, output_nodes)  # W2
 
 # Forward Propagation
 """
@@ -56,22 +50,15 @@ weights_2 = DataFrame(
 """
 
 
-def sigmoid_activation(neurons):
+def sigmoid_activation(dot_result):
     # Activation for the input, basically 1/(1 + e^-x)
-    return 1 / (1 + exp(-neurons))
+    return 1 / (1 + exp(-dot_result))
 
 
-# Initialize the Hidden Layer
-input_dot_weights_1 = X.dot(weights_1)
-input_dot_weights_1.columns = weights_2.index
-
-# Perform the activation
-activity_2 = sigmoid_activation(input_dot_weights_1)
-
-# Generate the output
-activity_2_dot_weights_2 = activity_2.dot(weights_2)
-activity_2_dot_weights_2.columns = output_neuron
-predicted_output = sigmoid_activation(activity_2_dot_weights_2)
+input_dot_weights_1 = dot(X, weights_1)  # z2
+activity_2 = sigmoid_activation(input_dot_weights_1)  # a2
+activity_2_dot_weights_2 = dot(activity_2, weights_2)  # z3
+predicted_output = sigmoid_activation(activity_2_dot_weights_2)  # yHat
 
 # Backward Propagation - Gradient Descent - Cost Function Prime
 """
@@ -89,37 +76,23 @@ predicted_output = sigmoid_activation(activity_2_dot_weights_2)
 """
 
 
-def sigmoid_activation_prime(neurons):
+def sigmoid_activation_prime(dot_result):
     # Derivative of the sigmoid function above - Power rule & Chain rule
     # Essentially e^-x/(1+e^-x)^2
-    return exp(-neurons) / (1 + exp(-neurons))**2
+    return exp(-dot_result) / (1 + exp(-dot_result))**2
 
 
-# How much was missed?
-miss_amount = -(y - predicted_output.values)
-
-# Perform the sigmoid_activation_prime function on the output layer
-# (moving backwards)
+miss_amount = -(y - predicted_output)
 sigmoid_prime_3 = sigmoid_activation_prime(activity_2_dot_weights_2)
-
-# Calculate Delta 3
-delta_3 = miss_amount * sigmoid_prime_3.values
-
-# Calculate the gradients for weights_2
-d_SSE_d_weights_2 = activity_2.T.dot(delta_3)
-
-# Perform the sigmoid_activation_prime on the hidden layer
+delta_3 = miss_amount * sigmoid_prime_3
+d_SSE_d_weights_2 = dot(activity_2.T, delta_3)
 sigmoid_prime_2 = sigmoid_activation_prime(input_dot_weights_1)
-
-# Calculate Delta 2
-delta_2 = (delta_3.dot(weights_2.T.values)).values * sigmoid_prime_2
-
-# Calculate the gradients for weights_1
-d_SSE_d_weights_1 = X.T.dot(delta_2)
+delta_2 = dot(delta_3, weights_2.T) * sigmoid_prime_2
+d_SSE_d_weights_1 = dot(X.T, delta_2)
 
 # Minimize error by updating weights
-weights_2 -= d_SSE_d_weights_2.values * learning_rate
-weights_1 -= d_SSE_d_weights_1.values * learning_rate
+weights_2 -= d_SSE_d_weights_2 * learning_rate
+weights_1 -= d_SSE_d_weights_1 * learning_rate
 
 # Training the model
 """
@@ -129,26 +102,25 @@ for every iteration
 2. Optionally, a stop condition may be added but this model
 will run for the amount of iterations provided
 """
-
 for i in range(iterations):
     # Forward Prop
-    input_dot_weights_1 = X.dot(weights_1)
-    input_dot_weights_1.columns = weights_2.index
+    input_dot_weights_1 = dot(X, weights_1)
     activity_2 = sigmoid_activation(input_dot_weights_1)
-    activity_2_dot_weights_2 = activity_2.dot(weights_2)
-    activity_2_dot_weights_2.columns = output_neuron
+    activity_2_dot_weights_2 = dot(activity_2, weights_2)
     predicted_output = sigmoid_activation(activity_2_dot_weights_2)
 
     # Backward Prop
-    miss_amount = -(y - predicted_output.values)
+    miss_amount = -(y - predicted_output)
     sigmoid_prime_3 = sigmoid_activation_prime(activity_2_dot_weights_2)
-    delta_3 = miss_amount * sigmoid_prime_3.values
-    d_SSE_d_weights_2 = activity_2.T.dot(delta_3)
+    delta_3 = miss_amount * sigmoid_prime_3
+    d_SSE_d_weights_2 = dot(activity_2.T, delta_3)
     sigmoid_prime_2 = sigmoid_activation_prime(input_dot_weights_1)
-    delta_2 = (delta_3.dot(weights_2.T.values)).values * sigmoid_prime_2
-    d_SSE_d_weights_1 = X.T.dot(delta_2)
-    weights_2 -= d_SSE_d_weights_2.values * learning_rate
-    weights_1 -= d_SSE_d_weights_1.values * learning_rate
+    delta_2 = dot(delta_3, weights_2.T) * sigmoid_prime_2
+    d_SSE_d_weights_1 = dot(X.T, delta_2)
+
+    # Minimize error by updating weights
+    weights_2 -= d_SSE_d_weights_2 * learning_rate
+    weights_1 -= d_SSE_d_weights_1 * learning_rate
 
 # Assign the results back to the original Pandas dataframe
 films["Film Review Score"] = y
