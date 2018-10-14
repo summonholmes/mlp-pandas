@@ -109,10 +109,6 @@ class MLP:
         # Calculate the gradients for weights_1
         self.d_SSE_d_weights_1 = self.X.T.dot(self.delta_2)
 
-        # Minimize error by updating weights
-        self.weights_2 -= self.d_SSE_d_weights_2.values * self.learning_rate
-        self.weights_1 -= self.d_SSE_d_weights_1.values * self.learning_rate
-
     def mlp_train(self):
         # Training the model
         """
