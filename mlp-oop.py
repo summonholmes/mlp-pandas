@@ -63,7 +63,7 @@ class MLP:
         3. Use the chain rule to solve for the d_SSE_d_weights 1 & 2
         4. Adjust the weights
         """
-        self.miss_amount = -(self.y - self.predicted_output)
+        self.miss_amount = self.predicted_output - self.y
         self.sigmoid_prime_3 = self.sigmoid_activation_prime(
             self.activity_2_dot_weights_2)
         self.delta_3 = self.miss_amount * self.sigmoid_prime_3
@@ -107,6 +107,7 @@ films = DataFrame({
     "Is Superhero Film": [0, 0, 0, 1, 1],
     "Film Review Score": [0, 0.65, 0.72, 0.93, 1]
 })
+films.index = ("Sample " + str(i + 1) for i in range(films.shape[0]))
 
 # Test the object
 X = films

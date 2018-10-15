@@ -18,6 +18,7 @@ films = DataFrame({
     "Is Superhero Film": [0, 0, 0, 1, 1],
     "Film Review Score": [0, 0.65, 0.72, 0.93, 1]
 })
+films.index = ("Sample " + str(i + 1) for i in range(films.shape[0]))
 X = films  # Tensor
 y = X.pop("Film Review Score")  # Target
 y = y.values[..., newaxis]
@@ -37,6 +38,9 @@ iterations = 500
 """
 Take random samples from the standard normal
 distribution
+
+Note: Everything should remain constant but the
+weights + the predicted output
 """
 weights_1 = randn(input_nodes, hidden_nodes)  # W1
 weights_2 = randn(hidden_nodes, output_nodes)  # W2
@@ -82,7 +86,7 @@ def sigmoid_activation_prime(dot_result):
     return exp(-dot_result) / (1 + exp(-dot_result))**2
 
 
-miss_amount = -(y - predicted_output)
+miss_amount = predicted_output - y
 sigmoid_prime_3 = sigmoid_activation_prime(activity_2_dot_weights_2)
 delta_3 = miss_amount * sigmoid_prime_3
 d_SSE_d_weights_2 = dot(activity_2.T, delta_3)
@@ -110,7 +114,7 @@ for i in range(iterations):
     predicted_output = sigmoid_activation(activity_2_dot_weights_2)
 
     # Backward Prop
-    miss_amount = -(y - predicted_output)
+    miss_amount = predicted_output - y
     sigmoid_prime_3 = sigmoid_activation_prime(activity_2_dot_weights_2)
     delta_3 = miss_amount * sigmoid_prime_3
     d_SSE_d_weights_2 = dot(activity_2.T, delta_3)

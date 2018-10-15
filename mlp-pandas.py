@@ -96,7 +96,7 @@ def sigmoid_activation_prime(neurons):
 
 
 # How much was missed?
-miss_amount = -(y - predicted_output.values)
+miss_amount = predicted_output.values - y
 
 # Perform the sigmoid_activation_prime function on the output layer
 # (moving backwards)
@@ -140,7 +140,7 @@ for i in range(iterations):
     predicted_output = sigmoid_activation(activity_2_dot_weights_2)
 
     # Backward Prop
-    miss_amount = -(y - predicted_output.values)
+    miss_amount = predicted_output.values - y
     sigmoid_prime_3 = sigmoid_activation_prime(activity_2_dot_weights_2)
     delta_3 = miss_amount * sigmoid_prime_3.values
     d_SSE_d_weights_2 = activity_2.T.dot(delta_3)

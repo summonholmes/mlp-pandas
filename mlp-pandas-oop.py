@@ -85,7 +85,7 @@ class MLP:
         """
 
         # How much was missed?
-        self.miss_amount = -(self.y - self.predicted_output.values)
+        self.miss_amount = self.predicted_output.values - self.y
 
         # Perform the sigmoid_activation_prime function on the output layer
         # (moving backwards)
