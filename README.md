@@ -1,11 +1,13 @@
 # mlp-pandas
-The artificial neural network (ANN) made easy with Pandas and plenty of documentation
+The artificial neural network (ANN) made easy with Pandas, matplotlib, and plenty of documentation
 
 ## ANNs too hard?
 With copious amounts of linear algebra and calculus, ANNs are often not for the faint of heart.  
 This project was inspired by 
 [Neural Networks Demystified](https://www.youtube.com/watch?v=bxe2T-V8XRs&list=PLiaHhY2iBX9hdHaRr6b7XevZtgZRa1PoU&index=1)
 as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2015/07/12/basic-python-network/).
+
+![alt text](https://raw.githubusercontent.com/summonholmes/mlp-pandas/master/Sample.png)
 
 ## Dependencies
 * python3-numpy

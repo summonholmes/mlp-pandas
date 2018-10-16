@@ -1,3 +1,6 @@
+from matplotlib.pyplot import Circle, subplots
+from matplotlib.lines import Line2D
+from math import floor
 from numpy import exp
 from numpy.random import randn
 from pandas import DataFrame
@@ -129,6 +132,77 @@ class MLP:
             self.weights_1 -= self.d_SSE_d_weights_1.values * \
                 self.learning_rate
 
+    def plot_input(self):
+        # Input Layer
+        self.x_input = [0.1 for i in range(1, self.X.shape[1] + 1)]
+        self.y_input = [0.1 + i * 0.1 for i in range(1, self.X.shape[1] + 1)]
+        self.circles_input = (Circle((x, y), 0.025, color='r')
+                              for x, y in zip(self.x_input, self.y_input))
+        self.labels_input = [
+            self.ax.annotate(col, xy=(x, y), fontsize=15, ha="center")
+            for x, y, col in zip(self.x_input, self.y_input, self.X.columns)
+        ]
+
+    def plot_hidden(self):
+        # Hidden Layer
+        self.x_hidden = [0.4 for i in range(1, self.X.shape[1] + 2)]
+        self.y_hidden = [0.05 + i * 0.1 for i in range(1, self.X.shape[1] + 2)]
+        self.circles_hidden = (Circle((x, y), 0.025, color='b')
+                               for x, y in zip(self.x_hidden, self.y_hidden))
+        self.labels_hidden = [
+            self.ax.annotate(
+                "HL1-Neuron " + str(i), xy=(x, y), fontsize=15, ha="center")
+            for x, y, i in zip(self.x_hidden, self.y_hidden,
+                               range(1, self.X.shape[1] + 2))
+        ]
+
+    def plot_output(self):
+        # Output Layer
+        self.hidden_mode = floor(len(self.y_hidden) / 2)
+        self.x_out = 0.8
+        self.y_out = self.y_hidden[self.hidden_mode]
+        self.output_circle = Circle((self.x_out, self.y_out), 0.025, color='g')
+        self.label_output = self.ax.annotate(
+            "Output Neuron",
+            xy=(self.x_out, self.y_out),
+            fontsize=15,
+            ha="center")
+
+    def plot_circles(self):
+        # Plot all circles
+        for input_circle in self.circles_input:
+            self.ax.add_artist(input_circle)
+        for hl_circle in self.circles_hidden:
+            self.ax.add_artist(hl_circle)
+        self.ax.add_artist(self.output_circle)
+
+    def plot_synapses(self):
+        # Synapses
+        self.input_synapses = ((y1, y2) for y2 in self.y_hidden
+                               for y1 in self.y_input)
+        self.output_synapses = ((y, self.y_out) for y in self.y_hidden)
+
+        # Plot all synapses
+        for syn in self.input_synapses:
+            self.ax.add_line(Line2D((0.1, 0.4), syn, color='y'))
+        for syn in self.output_synapses:
+            self.ax.add_line(Line2D((0.4, 0.8), syn, color='y'))
+
+    def plot_mlp(self):
+        # Graph the neural network
+        """
+        Plot each layer separately
+        """
+        self.fig, self.ax = subplots(figsize=(20, 20))
+        self.ax.axis("off")
+        self.ax.set_xlim((0, 0.9))
+        self.ax.set_ylim((0.1, 1))
+        self.plot_input()
+        self.plot_hidden()
+        self.plot_output()
+        self.plot_circles()
+        self.plot_synapses()
+
 
 # Create Dataset
 """
@@ -153,4 +227,7 @@ mlp.mlp_train()
 # Assign the results back to the original Pandas dataframe
 films["Film Review Score"] = mlp.y
 films["Predicted Score"] = mlp.predicted_output
+
+# View results
+mlp.plot_mlp()
 films

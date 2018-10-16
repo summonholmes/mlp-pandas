@@ -1,3 +1,6 @@
+from matplotlib.pyplot import Circle, subplots
+from matplotlib.lines import Line2D
+from math import floor
 from numpy import exp
 from numpy.random import randn
 from pandas import DataFrame
@@ -153,4 +156,60 @@ for i in range(iterations):
 # Assign the results back to the original Pandas dataframe
 films["Film Review Score"] = y
 films["Predicted Score"] = predicted_output
+
+# Graph the neural network
+"""
+Perform graphing on each layer separately
+"""
+fig, ax = subplots(figsize=(20, 20))
+ax.axis("off")
+ax.set_xlim((0, 0.9))
+ax.set_ylim((0.1, 1))
+
+# Input Layer
+x_input = [0.1 for i in range(1, X.shape[1] + 1)]
+y_input = [0.1 + i * 0.1 for i in range(1, X.shape[1] + 1)]
+circles_input = (Circle((x, y), 0.025, color='r')
+                 for x, y in zip(x_input, y_input))
+labels_input = [
+    ax.annotate(col, xy=(x, y), fontsize=15, ha="center")
+    for x, y, col in zip(x_input, y_input, X.columns)
+]
+
+# Hidden Layer
+x_hidden = [0.4 for i in range(1, X.shape[1] + 2)]
+y_hidden = [0.05 + i * 0.1 for i in range(1, X.shape[1] + 2)]
+circles_hidden = (Circle((x, y), 0.025, color='b')
+                  for x, y in zip(x_hidden, y_hidden))
+labels_hidden = [
+    ax.annotate("HL1-Neuron " + str(i), xy=(x, y), fontsize=15, ha="center")
+    for x, y, i in zip(x_hidden, y_hidden, range(1, X.shape[1] + 2))
+]
+
+# Output Layer
+hidden_mode = floor(len(y_hidden) / 2)
+x_out = 0.8
+y_out = y_hidden[hidden_mode]
+output_circle = Circle((x_out, y_out), 0.025, color='g')
+label_output = ax.annotate(
+    "Output Neuron", xy=(x_out, y_out), fontsize=15, ha="center")
+
+# Synapses
+input_synapses = ((y1, y2) for y2 in y_hidden for y1 in y_input)
+output_synapses = ((y, y_out) for y in y_hidden)
+
+# Plot all circles
+for input_circle in circles_input:
+    ax.add_artist(input_circle)
+for hl_circle in circles_hidden:
+    ax.add_artist(hl_circle)
+ax.add_artist(output_circle)
+
+# Plot all synapses
+for syn in input_synapses:
+    ax.add_line(Line2D((0.1, 0.4), syn, color='y'))
+for syn in output_synapses:
+    ax.add_line(Line2D((0.4, 0.8), syn, color='y'))
+
+# Finally, view the original dataframe
 films
