@@ -12,6 +12,7 @@ as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2
 ## Dependencies
 * python3-numpy
 * python3-pandas
+* python3-matplotlib
 
 ## Overview
 The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with a single hidden layer.  
