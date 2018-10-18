@@ -38,7 +38,6 @@ class MLP:
             index=("HL1-Neuron " + str(i + 1)
                    for i in range(self.weights_1.shape[1])),
             columns=["Output Synapses"])
-        self.output_neuron = ["Output Neuron"]
 
     def sigmoid_activation(self, neurons):
         # Activation for the input, basically 1/(1 + e^-x)
