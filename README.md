@@ -57,3 +57,6 @@ The predicted results are added back to the original dataframe as the "Predicted
 
 ## Instructions
 These scripts are intended for educational purposes.  Use these scripts interactively in an IPython environment.
+
+## In Progress
+Allow the user to specify the number of hidden layers, and to dynamically visualize varying inputs and multiple hidden layers.
