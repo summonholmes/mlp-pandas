@@ -15,16 +15,8 @@ as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2
 * python3-matplotlib
 
 ## Scripts
-1. mlp.py : This is the shortest and most efficient implementation of the process.  However,
-there are no index or column labels throughout the process.
-
-2. mlp-oop.py : This is the object oriented form of (1.).  This organization allows
-for easier interpretation of the code, at the cost of increased debugging difficulty.
-
-3. mlp-pandas.py : This is (1.) adapted for Pandas with complete index and column labeling.
-
-4. mlp-pandas-oop.py : This is the object oriented form of (3.) with the same
-pros and cons in (2.).
+1. mlp-pandas.py : Run the actual neural network.  Change parameters as needed.
+2. mlp-plot.py : Plot the single hidden layer architecture of the neural network for provided data.
 
 ## Overview
 The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with a single hidden layer.  
@@ -59,4 +51,4 @@ The predicted results are added back to the original dataframe as the "Predicted
 These scripts are intended for educational purposes.  Use these scripts interactively in an IPython environment.
 
 ## In Progress
-Allow the user to specify the number of hidden layers, and to dynamically visualize varying inputs and multiple hidden layers.
+Allow the user to dynamically visualize varying inputs and multiple hidden layers.
