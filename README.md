@@ -19,7 +19,7 @@ as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2
 2. mlp-plot.py : Plot the single hidden layer architecture of the neural network for provided data.
 
 ## Overview
-The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with a single hidden layer.  
+The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with a adjustable hidden layers.  
 This will be referred to as 'the model' throughout this README.
 
 #### Data Source
