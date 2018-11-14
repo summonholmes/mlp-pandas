@@ -27,7 +27,7 @@ These dictate the structure of the ANN
 """
 input_nodes = X.shape[1]
 hidden_neurons = X.shape[1] + 1
-hidden_layers = 1
+hidden_layers = 1  # Must be at least 1
 output_neuron = 1
 learning_rate = 1  # Dictates weight adjustment
 iterations = 500
@@ -134,18 +134,53 @@ bkwd_neurons = []
 deltas = []
 d_SSE_d_weights = []
 
-miss_amount = fwd_neurons[-1][1].values - y
-bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
-deltas.insert(0, miss_amount * bkwd_neurons[0].values)
-d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
+if len(fwd_neurons) <= 2:
+    miss_amount = fwd_neurons[-1][1].values - y
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+    deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+    d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
 
-bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
-deltas.insert(
-    0, (deltas[0].dot(weights["HL-Output"].T.values)).values * bkwd_neurons[0])
-d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+    deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values *
+                  bkwd_neurons[0])
+    d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
 
-weights["HL-Output"] -= d_SSE_d_weights[1].values * learning_rate
-weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
+    weights["HL-Output"] -= d_SSE_d_weights[1].values * learning_rate
+    weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
+else:
+    miss_amount = fwd_neurons[-1][1].values - y
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+    deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+    d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
+
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+    deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values *
+                  bkwd_neurons[0])
+    d_SSE_d_weights.insert(0, fwd_neurons[-3][0].T.dot(deltas[0]))
+
+    for fwd_cur, fwd_next, weight in zip(
+            reversed(fwd_neurons[1:-2]), reversed(fwd_neurons[0:-3]),
+            reversed(weights["HL-HL"][1:])):
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_cur[0]))
+        deltas.insert(
+            0, (deltas[0].dot(weight.T.values)).values * bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, fwd_next[0].T.dot(deltas[0]))
+
+    # End
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[0][0]))
+    deltas.insert(
+        0,
+        (deltas[0].dot(weights["HL-HL"][0].T.values)).values * bkwd_neurons[0])
+    d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
+
+    weights["HL-Output"] -= d_SSE_d_weights[len(d_SSE_d_weights) -
+                                            1].values * learning_rate
+    # Loop
+    for i, weight in enumerate(weights["HL-HL"], 1):
+        weight -= d_SSE_d_weights[i].values * learning_rate
+
+    # End Loop
+    weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
 
 # Training the model
 """
@@ -197,18 +232,52 @@ for i in range(iterations):
     deltas = []
     d_SSE_d_weights = []
 
-    miss_amount = fwd_neurons[-1][1].values - y
-    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
-    deltas.insert(0, miss_amount * bkwd_neurons[0].values)
-    d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
+    if len(fwd_neurons) <= 2:
+        miss_amount = fwd_neurons[-1][1].values - y
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+        deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+        d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
 
-    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
-    deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values *
-                  bkwd_neurons[0])
-    d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+        deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values
+                      * bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
 
-    weights["HL-Output"] -= d_SSE_d_weights[1].values * learning_rate
-    weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
+        weights["HL-Output"] -= d_SSE_d_weights[1].values * learning_rate
+        weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
+    else:
+        miss_amount = fwd_neurons[-1][1].values - y
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+        deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+        d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
+
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+        deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values
+                      * bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, fwd_neurons[-3][0].T.dot(deltas[0]))
+
+        for fwd_cur, fwd_next, weight in zip(
+                reversed(fwd_neurons[1:-2]), reversed(fwd_neurons[0:-3]),
+                reversed(weights["HL-HL"][1:])):
+            bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_cur[0]))
+            deltas.insert(
+                0, (deltas[0].dot(weight.T.values)).values * bkwd_neurons[0])
+            d_SSE_d_weights.insert(0, fwd_next[0].T.dot(deltas[0]))
+
+        # End
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[0][0]))
+        deltas.insert(0, (deltas[0].dot(weights["HL-HL"][0].T.values)).values *
+                      bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
+
+        weights["HL-Output"] -= d_SSE_d_weights[len(d_SSE_d_weights) -
+                                                1].values * learning_rate
+        # Loop
+        for i, weight in enumerate(weights["HL-HL"], 1):
+            weight -= d_SSE_d_weights[i].values * learning_rate
+
+        # End Loop
+        weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
 
 # Assign the results back to the original Pandas dataframe
 films["Film Review Score"] = y
