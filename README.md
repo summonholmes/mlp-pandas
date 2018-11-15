@@ -15,8 +15,7 @@ as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2
 * python3-matplotlib
 
 ## Scripts
-1. mlp-pandas.py : Run the actual neural network.  Change parameters as needed.
-2. mlp-plot.py : Plot the single hidden layer architecture of the neural network for provided data.
+mlp-pandas.py : Run the ANN and plot the architecture.  Change the parameters as needed.
 
 ## Overview
 The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with a adjustable hidden layers.  
@@ -28,27 +27,23 @@ n-dimensional numerical dataset.  If any data is categorial, it must be converte
 to boolean, or one-hot encoding must be performed.
 
 #### Hyperparameters
-The hyperparameters will scale according to the dimensionality of the dataset.
-The hyperparameters initialize the architecture of the model.
+Only the number of hidden layers is required.  The hyperparameters will scale according to the dimensionality of the dataset.  The hyperparameters initialize the architecture of the model.  
 
 #### Weights/Synapses
 These are initialized randomly using the standard normal distribution.
 
 #### Forward Propagation
-Consisting of only linear algebra, this process simply takes the input and allows the model to ouput a result.
+Consisting of linear algebra, this process simply takes the input and allows the model to ouput a result.
 
 #### Backward Propagation
-In addition to linear algebra, the optimization method Stochastic Gradient Descent (SGD) is applied in
-batch-style to indicate the changes needed for the weights/synapses.
+In addition to linear algebra, the optimization method Gradient Descent is applied
+to indicate the changes needed for the weights/synapses.
 
 #### Training
-The Forward Propagation and Backward Propagation will iterate and update the weights using the gradient values directly.
+The Forward Propagation and Backward Propagation will iterate and update the weights using the gradient values directly.  This can be accelerated with the learning rate.
 
 #### Results
 The predicted results are added back to the original dataframe as the "Predicted Score".
 
 ## Instructions
 These scripts are intended for educational purposes.  Use these scripts interactively in an IPython environment.
-
-## In Progress
-Allow the user to dynamically visualize varying inputs and multiple hidden layers.
