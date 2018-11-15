@@ -1,10 +1,6 @@
-from matplotlib.pyplot import Circle, subplots
-from matplotlib.lines import Line2D
-from math import floor
 from numpy import exp
 from numpy.random import randn
 from pandas import DataFrame
-# seed(0)
 """MLP Pandas"""
 
 # Create Dataset
@@ -30,25 +26,43 @@ y = DataFrame(X.pop("Film Review Score"))  # Target
 These dictate the structure of the ANN
 """
 input_nodes = X.shape[1]
-hidden_nodes = X.shape[1] + 1
-output_nodes = 1
+hidden_neurons = X.shape[1] + 1
+hidden_layers = 3  # Must be at least 1
+output_neuron = 1
 learning_rate = 1  # Dictates weight adjustment
 iterations = 500
-output_neuron = ["Output Neuron"]  # Just a final column label
 
 # Generate weights
 """
 Take random samples from the standard normal
 distribution
 """
-weights_1 = DataFrame(
-    randn(input_nodes, hidden_nodes),
-    index=X.columns,
-    columns=("Input Synapses " + str(i + 1) for i in range(X.shape[1] + 1)))
-weights_2 = DataFrame(
-    randn(hidden_nodes, output_nodes),
-    index=("HL1-Neuron " + str(i + 1) for i in range(weights_1.shape[1])),
-    columns=["Output Synapses"])
+weights = {
+    "Input-HL":
+    DataFrame(
+        randn(input_nodes, hidden_neurons),
+        index=X.columns,
+        columns=("Input Synapses " + str(i)
+                 for i in range(1, hidden_neurons + 1))),
+    "HL-HL": [
+        DataFrame(
+            randn(hidden_neurons, hidden_neurons),
+            index=("HL" + str(i) + "-Neuron " + str(j)
+                   for j in range(1, hidden_neurons + 1)),
+            columns=("HL" + str(i) + "-Synapse " + str(j)
+                     for j in range(1, hidden_neurons + 1)))
+        for i in range(1, hidden_layers)  # Offset here
+    ],
+    "HL-Output":
+    DataFrame(
+        randn(hidden_neurons, output_neuron),
+        index=("HL" + str(hidden_layers) + "-Neuron " + str(i)
+               for i in range(1, hidden_neurons + 1)),
+        columns=["Output Synapses"])
+}
+
+if not weights["HL-HL"]:
+    del weights["HL-HL"]
 
 # Forward Propagation
 """
@@ -64,17 +78,34 @@ def sigmoid_activation(neurons):
     return 1 / (1 + exp(-neurons))
 
 
-# Initialize the Hidden Layer
-input_dot_weights_1 = X.dot(weights_1)
-input_dot_weights_1.columns = weights_2.index
+# Forward Prop
+fwd_neurons = []
+if "HL-HL" in weights:
+    fwd_neurons.append(X.dot(weights["Input-HL"]))
+    fwd_neurons[-1].columns = weights["HL-HL"][0].index
+    fwd_neurons[-1] = (fwd_neurons[-1], sigmoid_activation(fwd_neurons[-1]))
 
-# Perform the activation
-activity_2 = sigmoid_activation(input_dot_weights_1)
+    for weight_1, weight_2 in zip(weights["HL-HL"][:-1], weights["HL-HL"][1:]):
+        fwd_neurons.append(fwd_neurons[-1][1].dot(weight_1))
+        fwd_neurons[-1].columns = weight_2.index
+        fwd_neurons[-1] = (fwd_neurons[-1],
+                           sigmoid_activation(fwd_neurons[-1]))
 
-# Generate the output
-activity_2_dot_weights_2 = activity_2.dot(weights_2)
-activity_2_dot_weights_2.columns = output_neuron
-predicted_output = sigmoid_activation(activity_2_dot_weights_2)
+    fwd_neurons.append(fwd_neurons[-1][1].dot(weights["HL-HL"][-1]))
+    fwd_neurons[-1].columns = weights["HL-Output"].index
+    fwd_neurons[-1] = (fwd_neurons[-1], sigmoid_activation(fwd_neurons[-1]))
+
+    fwd_neurons.append(fwd_neurons[-1][1].dot(weights["HL-Output"]))
+    fwd_neurons[-1].columns = ["Output Neuron"]
+    fwd_neurons[-1] = (fwd_neurons[-1], sigmoid_activation(fwd_neurons[-1]))
+else:
+    fwd_neurons.append(X.dot(weights["Input-HL"]))
+    fwd_neurons[-1].columns = weights["HL-Output"].index
+    fwd_neurons[-1] = (fwd_neurons[-1], sigmoid_activation(fwd_neurons[-1]))
+
+    fwd_neurons.append(fwd_neurons[-1][1].dot(weights["HL-Output"]))
+    fwd_neurons[-1].columns = ["Output Neuron"]
+    fwd_neurons[-1] = (fwd_neurons[-1], sigmoid_activation(fwd_neurons[-1]))
 
 # Backward Propagation - Gradient Descent - Cost Function Prime
 """
@@ -98,31 +129,57 @@ def sigmoid_activation_prime(neurons):
     return exp(-neurons) / (1 + exp(-neurons))**2
 
 
-# How much was missed?
-miss_amount = predicted_output.values - y
+# Backprop
+bkwd_neurons = []
+deltas = []
+d_SSE_d_weights = []
+miss_amount = fwd_neurons[-1][1].values - y
 
-# Perform the sigmoid_activation_prime function on the output layer
-# (moving backwards)
-sigmoid_prime_3 = sigmoid_activation_prime(activity_2_dot_weights_2)
+if len(fwd_neurons) <= 2:
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+    deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+    d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
 
-# Calculate Delta 3
-delta_3 = miss_amount * sigmoid_prime_3.values
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+    deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values *
+                  bkwd_neurons[0])
+    d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
 
-# Calculate the gradients for weights_2
-d_SSE_d_weights_2 = activity_2.T.dot(delta_3)
+    weights["HL-Output"] -= d_SSE_d_weights[1].values * learning_rate
+    weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
+else:
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+    deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+    d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
 
-# Perform the sigmoid_activation_prime on the hidden layer
-sigmoid_prime_2 = sigmoid_activation_prime(input_dot_weights_1)
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+    deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values *
+                  bkwd_neurons[0])
+    d_SSE_d_weights.insert(0, fwd_neurons[-3][0].T.dot(deltas[0]))
 
-# Calculate Delta 2
-delta_2 = (delta_3.dot(weights_2.T.values)).values * sigmoid_prime_2
+    for fwd_cur, fwd_next, weight in zip(
+            reversed(fwd_neurons[1:-2]), reversed(fwd_neurons[0:-3]),
+            reversed(weights["HL-HL"][1:])):
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_cur[0]))
+        deltas.insert(
+            0, (deltas[0].dot(weight.T.values)).values * bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, fwd_next[0].T.dot(deltas[0]))
 
-# Calculate the gradients for weights_1
-d_SSE_d_weights_1 = X.T.dot(delta_2)
+    # End
+    bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[0][0]))
+    deltas.insert(
+        0,
+        (deltas[0].dot(weights["HL-HL"][0].T.values)).values * bkwd_neurons[0])
+    d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
 
-# Minimize error by updating weights
-weights_2 -= d_SSE_d_weights_2.values * learning_rate
-weights_1 -= d_SSE_d_weights_1.values * learning_rate
+    weights["HL-Output"] -= d_SSE_d_weights[len(d_SSE_d_weights) -
+                                            1].values * learning_rate
+    # Loop
+    for i, weight in enumerate(weights["HL-HL"], 1):
+        weight -= d_SSE_d_weights[i].values * learning_rate
+
+    # End Loop
+    weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
 
 # Training the model
 """
@@ -135,81 +192,93 @@ will run for the amount of iterations provided
 
 for i in range(iterations):
     # Forward Prop
-    input_dot_weights_1 = X.dot(weights_1)
-    input_dot_weights_1.columns = weights_2.index
-    activity_2 = sigmoid_activation(input_dot_weights_1)
-    activity_2_dot_weights_2 = activity_2.dot(weights_2)
-    activity_2_dot_weights_2.columns = output_neuron
-    predicted_output = sigmoid_activation(activity_2_dot_weights_2)
+    fwd_neurons = []
+    if "HL-HL" in weights:
+        fwd_neurons.append(X.dot(weights["Input-HL"]))
+        fwd_neurons[-1].columns = weights["HL-HL"][0].index
+        fwd_neurons[-1] = (fwd_neurons[-1],
+                           sigmoid_activation(fwd_neurons[-1]))
+
+        for weight_1, weight_2 in zip(weights["HL-HL"][:-1],
+                                      weights["HL-HL"][1:]):
+            fwd_neurons.append(fwd_neurons[-1][1].dot(weight_1))
+            fwd_neurons[-1].columns = weight_2.index
+            fwd_neurons[-1] = (fwd_neurons[-1],
+                               sigmoid_activation(fwd_neurons[-1]))
+
+        fwd_neurons.append(fwd_neurons[-1][1].dot(weights["HL-HL"][-1]))
+        fwd_neurons[-1].columns = weights["HL-Output"].index
+        fwd_neurons[-1] = (fwd_neurons[-1],
+                           sigmoid_activation(fwd_neurons[-1]))
+
+        fwd_neurons.append(fwd_neurons[-1][1].dot(weights["HL-Output"]))
+        fwd_neurons[-1].columns = ["Output Neuron"]
+        fwd_neurons[-1] = (fwd_neurons[-1],
+                           sigmoid_activation(fwd_neurons[-1]))
+    else:
+        fwd_neurons.append(X.dot(weights["Input-HL"]))
+        fwd_neurons[-1].columns = weights["HL-Output"].index
+        fwd_neurons[-1] = (fwd_neurons[-1],
+                           sigmoid_activation(fwd_neurons[-1]))
+
+        fwd_neurons.append(fwd_neurons[-1][1].dot(weights["HL-Output"]))
+        fwd_neurons[-1].columns = ["Output Neuron"]
+        fwd_neurons[-1] = (fwd_neurons[-1],
+                           sigmoid_activation(fwd_neurons[-1]))
 
     # Backward Prop
-    miss_amount = predicted_output.values - y
-    sigmoid_prime_3 = sigmoid_activation_prime(activity_2_dot_weights_2)
-    delta_3 = miss_amount * sigmoid_prime_3.values
-    d_SSE_d_weights_2 = activity_2.T.dot(delta_3)
-    sigmoid_prime_2 = sigmoid_activation_prime(input_dot_weights_1)
-    delta_2 = (delta_3.dot(weights_2.T.values)).values * sigmoid_prime_2
-    d_SSE_d_weights_1 = X.T.dot(delta_2)
-    weights_2 -= d_SSE_d_weights_2.values * learning_rate
-    weights_1 -= d_SSE_d_weights_1.values * learning_rate
+    bkwd_neurons = []
+    deltas = []
+    d_SSE_d_weights = []
+
+    if len(fwd_neurons) <= 2:
+        miss_amount = fwd_neurons[-1][1].values - y
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+        deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+        d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
+
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+        deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values
+                      * bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
+
+        weights["HL-Output"] -= d_SSE_d_weights[1].values * learning_rate
+        weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
+    else:
+        miss_amount = fwd_neurons[-1][1].values - y
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-1][0]))
+        deltas.insert(0, miss_amount * bkwd_neurons[0].values)
+        d_SSE_d_weights.insert(0, fwd_neurons[-2][0].T.dot(deltas[0]))
+
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[-2][0]))
+        deltas.insert(0, (deltas[0].dot(weights["HL-Output"].T.values)).values
+                      * bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, fwd_neurons[-3][0].T.dot(deltas[0]))
+
+        for fwd_cur, fwd_next, weight in zip(
+                reversed(fwd_neurons[1:-2]), reversed(fwd_neurons[0:-3]),
+                reversed(weights["HL-HL"][1:])):
+            bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_cur[0]))
+            deltas.insert(
+                0, (deltas[0].dot(weight.T.values)).values * bkwd_neurons[0])
+            d_SSE_d_weights.insert(0, fwd_next[0].T.dot(deltas[0]))
+
+        # End
+        bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_neurons[0][0]))
+        deltas.insert(0, (deltas[0].dot(weights["HL-HL"][0].T.values)).values *
+                      bkwd_neurons[0])
+        d_SSE_d_weights.insert(0, X.T.dot(deltas[0]))
+
+        weights["HL-Output"] -= d_SSE_d_weights[len(d_SSE_d_weights) -
+                                                1].values * learning_rate
+        # Loop
+        for i, weight in enumerate(weights["HL-HL"], 1):
+            weight -= d_SSE_d_weights[i].values * learning_rate
+
+        # End Loop
+        weights["Input-HL"] -= d_SSE_d_weights[0].values * learning_rate
 
 # Assign the results back to the original Pandas dataframe
 films["Film Review Score"] = y
-films["Predicted Score"] = predicted_output
-
-# Graph the neural network
-"""
-Perform graphing on each layer separately
-"""
-fig, ax = subplots(figsize=(20, 20))
-ax.axis("off")
-ax.set_xlim((0, 0.9))
-ax.set_ylim((0.1, 1))
-
-# Input Layer
-x_input = [0.1 for i in range(1, X.shape[1] + 1)]
-y_input = [0.1 + i * 0.1 for i in range(1, X.shape[1] + 1)]
-circles_input = (Circle((x, y), 0.025, color='r')
-                 for x, y in zip(x_input, y_input))
-labels_input = [
-    ax.annotate(col, xy=(x, y), fontsize=15, ha="center")
-    for x, y, col in zip(x_input, y_input, X.columns)
-]
-
-# Hidden Layer
-x_hidden = [0.4 for i in range(1, X.shape[1] + 2)]
-y_hidden = [0.05 + i * 0.1 for i in range(1, X.shape[1] + 2)]
-circles_hidden = (Circle((x, y), 0.025, color='b')
-                  for x, y in zip(x_hidden, y_hidden))
-labels_hidden = [
-    ax.annotate("HL1-Neuron " + str(i), xy=(x, y), fontsize=15, ha="center")
-    for x, y, i in zip(x_hidden, y_hidden, range(1, X.shape[1] + 2))
-]
-
-# Output Layer
-hidden_mode = floor(len(y_hidden) / 2)
-x_out = 0.8
-y_out = y_hidden[hidden_mode]
-output_circle = Circle((x_out, y_out), 0.025, color='g')
-label_output = ax.annotate(
-    "Output Neuron", xy=(x_out, y_out), fontsize=15, ha="center")
-
-# Synapses
-input_synapses = ((y1, y2) for y2 in y_hidden for y1 in y_input)
-output_synapses = ((y, y_out) for y in y_hidden)
-
-# Plot all circles
-for input_circle in circles_input:
-    ax.add_artist(input_circle)
-for hl_circle in circles_hidden:
-    ax.add_artist(hl_circle)
-ax.add_artist(output_circle)
-
-# Plot all synapses
-for syn in input_synapses:
-    ax.add_line(Line2D((0.1, 0.4), syn, color='y'))
-for syn in output_synapses:
-    ax.add_line(Line2D((0.4, 0.8), syn, color='y'))
-
-# Finally, view the original dataframe
+films["Predicted Score"] = fwd_neurons[-1][-1]
 films

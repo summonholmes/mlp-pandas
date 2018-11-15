@@ -27,8 +27,8 @@ Perform graphing on each layer separately
 """
 fig, ax = subplots(figsize=(20, 20))
 ax.axis("off")
-ax.set_xlim((0.0, 0.85))
-ax.set_ylim((0.1, 0.8))
+ax.set_xlim((0, 1))
+ax.set_ylim((0, 1))
 
 # Input Layer
 x_input = [0.1 for i in range(1, X.shape[1] + 1)]
