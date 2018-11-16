@@ -69,7 +69,7 @@ gradient values directly.  This may be accelerated with the learning rate.
 The predicted results are added back to the original dataframe as the "Predicted Score".
 
 #### 8. Plotting
-The model is capable of plotting the ANN archeticture if the number of hidden layers is
+The model is capable of plotting the ANN architecture if the number of hidden layers is
 between 1 and 3.
 
 ## Instructions
