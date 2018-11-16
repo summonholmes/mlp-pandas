@@ -15,7 +15,12 @@ as well as [A Neural Network in 11 lines of Python](https://iamtrask.github.io/2
 * python3-matplotlib
 
 ## Scripts
-mlp-pandas.py : Run the ANN and plot the architecture.  Change the parameters as needed.
+* main.py : The file used to demo the project.  Run in a Jupyter 
+notebook environment.
+* MLP.py : The MLP class.  Change the parameters as needed.
+* forward_prop.py : Perform forward propagation.
+* backward_prop.py : Perform backward propagation.
+* plot_mlp.py : Plot the model architecture.
 
 ## Overview
 The ANN in this example is also known as a Multilayer Perceptron (MLP) regressor with adjustable hidden 
@@ -71,6 +76,3 @@ The predicted results are added back to the original dataframe as the "Predicted
 #### 8. Plotting
 The model is capable of plotting the ANN architecture if the number of hidden layers is
 between 1 and 3.
-
-## Instructions
-These scripts are intended for educational purposes.  Use these scripts interactively in an IPython environment.
