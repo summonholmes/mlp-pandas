@@ -16,7 +16,8 @@ def gen_weights(self):
             randn(self.input_nodes, self.hidden_neurons),
             index=self.X.columns,
             columns=("Input Synapses " + str(i)
-                     for i in range(1, self.hidden_neurons + 1)))
+                     for i in range(1, self.hidden_neurons + 1)),
+        )
 
     def gen_hl_hl_weights(self):
         # Initialize hidden layer to hidden layer synapses
@@ -26,8 +27,8 @@ def gen_weights(self):
                 index=("HL" + str(i) + "-Neuron " + str(j)
                        for j in range(1, self.hidden_neurons + 1)),
                 columns=("HL" + str(i) + "-Synapse " + str(j)
-                         for j in range(1, self.hidden_neurons + 1)))
-            for i in range(1, self.hidden_layers)  # Offset here
+                         for j in range(1, self.hidden_neurons + 1)),
+            ) for i in range(1, self.hidden_layers)  # Offset here
         ]
 
     def gen_hl_output_weights(self):
@@ -36,7 +37,8 @@ def gen_weights(self):
             randn(self.hidden_neurons, self.output_neuron),
             index=("HL" + str(self.hidden_neurons) + "-Neuron " + str(i)
                    for i in range(1, self.hidden_neurons + 1)),
-            columns=["Output Synapses"])
+            columns=["Output Synapses"],
+        )
 
     def check_hl_count(self):
         # If # hidden layers == 1, delete the "HL-HL" key

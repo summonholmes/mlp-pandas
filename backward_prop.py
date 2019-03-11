@@ -32,30 +32,52 @@ def backward_prop(self):
     def bkwd_output(self):
         # Output - Now work backwards, preferring insert over append
         self.bkwd_neurons.insert(
-            0, sigmoid_activation_prime(self.fwd_neurons[-1][0]))
-        self.deltas.insert(0, self.miss_amount * self.bkwd_neurons[0].values)
+            0,
+            sigmoid_activation_prime(self.fwd_neurons[-1][0]),
+        )
+        self.deltas.insert(
+            0,
+            self.miss_amount * self.bkwd_neurons[0].values,
+        )
         self.d_SSE_d_weights.insert(
-            0, self.fwd_neurons[-2][0].T.dot(self.deltas[0]))
+            0,
+            self.fwd_neurons[-2][0].T.dot(self.deltas[0]),
+        )
 
     def bkwd_output_hl_single(self):
         # Single layer: Output to hidden layers using previous delta
         # Gradient calculaton ends here for single layer ANNs
         self.bkwd_neurons.insert(
-            0, sigmoid_activation_prime(self.fwd_neurons[-2][0]))
-        self.deltas.insert(0, (self.deltas[0].dot(
-            self.weights["HL-Output"].T.values)).values * self.bkwd_neurons[0])
-        self.d_SSE_d_weights.insert(0, self.X.T.dot(self.deltas[0]))
+            0,
+            sigmoid_activation_prime(self.fwd_neurons[-2][0]),
+        )
+        self.deltas.insert(
+            0,
+            (self.deltas[0].dot(self.weights["HL-Output"].T.values)).values *
+            self.bkwd_neurons[0],
+        )
+        self.d_SSE_d_weights.insert(
+            0,
+            self.X.T.dot(self.deltas[0]),
+        )
 
     def bkwd_output_hl(self):
         # Unlike the single layer above, continue backpropagating through
         # the unactivated forward neurons, and activate them
         # with sigmoid_activation_prime instead
         self.bkwd_neurons.insert(
-            0, sigmoid_activation_prime(self.fwd_neurons[-2][0]))
-        self.deltas.insert(0, (self.deltas[0].dot(
-            self.weights["HL-Output"].T.values)).values * self.bkwd_neurons[0])
+            0,
+            sigmoid_activation_prime(self.fwd_neurons[-2][0]),
+        )
+        self.deltas.insert(
+            0,
+            (self.deltas[0].dot(self.weights["HL-Output"].T.values)).values *
+            self.bkwd_neurons[0],
+        )
         self.d_SSE_d_weights.insert(
-            0, self.fwd_neurons[-3][0].T.dot(self.deltas[0]))
+            0,
+            self.fwd_neurons[-3][0].T.dot(self.deltas[0]),
+        )
 
     def bkwd_hl_hl(self):
         # When backpropagating through hidden layers, must
@@ -65,20 +87,38 @@ def backward_prop(self):
         for fwd_cur, fwd_pre, weight in zip(
                 reversed(self.fwd_neurons[1:-2]),
                 reversed(self.fwd_neurons[0:-3]),
-                reversed(self.weights["HL-HL"][1:])):
-            self.bkwd_neurons.insert(0, sigmoid_activation_prime(fwd_cur[0]))
-            self.deltas.insert(0, (self.deltas[0].dot(weight.T.values)).values
-                               * self.bkwd_neurons[0])
-            self.d_SSE_d_weights.insert(0, fwd_pre[0].T.dot(self.deltas[0]))
+                reversed(self.weights["HL-HL"][1:]),
+        ):
+            self.bkwd_neurons.insert(
+                0,
+                sigmoid_activation_prime(fwd_cur[0]),
+            )
+            self.deltas.insert(
+                0,
+                (self.deltas[0].dot(weight.T.values)).values *
+                self.bkwd_neurons[0],
+            )
+            self.d_SSE_d_weights.insert(
+                0,
+                fwd_pre[0].T.dot(self.deltas[0]),
+            )
 
     def bkwd_hl_input(self):
         # From the hidden layer to input, now the actual inputs are
         # reached and the gradient calculations are complete
         self.bkwd_neurons.insert(
-            0, sigmoid_activation_prime(self.fwd_neurons[0][0]))
-        self.deltas.insert(0, (self.deltas[0].dot(
-            self.weights["HL-HL"][0].T.values)).values * self.bkwd_neurons[0])
-        self.d_SSE_d_weights.insert(0, self.X.T.dot(self.deltas[0]))
+            0,
+            sigmoid_activation_prime(self.fwd_neurons[0][0]),
+        )
+        self.deltas.insert(
+            0,
+            (self.deltas[0].dot(self.weights["HL-HL"][0].T.values)).values *
+            self.bkwd_neurons[0],
+        )
+        self.d_SSE_d_weights.insert(
+            0,
+            self.X.T.dot(self.deltas[0]),
+        )
 
     def update_weights_single(self):
         # Update weights based on gradient direction
