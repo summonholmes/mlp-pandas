@@ -63,11 +63,27 @@ Remove them.
 """
 X.dropna(inplace=True)
 
+# %% Rename Columns
+"""
+When presenting visualizations to an audience,
+make the variable names make sense!
+"""
+X.columns = [
+    "Survived",
+    "Passenger Class",
+    "Age",
+    "Fare",
+    "Is Alone",
+    "Is Female",
+    "Is Male",
+    "Is Child",
+]
+
 # %% Finally, get the dependent variable
 """
 The ANN will predict this variable as a probability
 """
-y = DataFrame(X.pop("survived"))  # Target
+y = DataFrame(X.pop("Survived"))  # Target
 
 # %% Predict
 """
@@ -86,6 +102,6 @@ plot_mlp(mlp)  # Plot the architecture if <= 3
 The last two columns show the results
 of the whole process.
 """
-X["survived"] = y
-X["survival_pred"] = mlp.fwd_neurons[-1][-1]
+X["Survived"] = y
+X["Survived Prediction"] = mlp.fwd_neurons[-1][-1]
 X

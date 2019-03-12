@@ -18,7 +18,7 @@ def plot_mlp(self):
     self.input_coord = {}
     self.hidden_coord = {}
     self.output_coord = {}
-    fig, ax = subplots(figsize=(40, 20))
+    fig, ax = subplots(figsize=(40, 40))
     ax.axis("off")
     ax.set_xlim((0, 1))
     ax.set_ylim((0, 1))
