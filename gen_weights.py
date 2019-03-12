@@ -35,7 +35,7 @@ def gen_weights(self):
         # Initialize hidden layer to output synapses
         self.weights["HL-Output"] = DataFrame(
             randn(self.hidden_neurons, self.output_neuron),
-            index=("HL" + str(self.hidden_neurons) + "-Neuron " + str(i)
+            index=("HL" + str(self.hidden_layers) + "-Neuron " + str(i)
                    for i in range(1, self.hidden_neurons + 1)),
             columns=["Output Synapses"],
         )
